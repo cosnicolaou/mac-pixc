@@ -73,11 +73,53 @@ These provided suifficient for my initial testing. Obviously it would good to au
 
 ### Scripts to run the compiler
 
+A helper script, *bin/generate-compiler-scripts.sh*, is provided that generates scripts to run the C/C++ cross compiler and to build/run the go compiler (see subsequent sections for details). It takes two arguments, one for the sysroot location and one for the *<name>* to use when generating the scripts to run the cross compiler. It generates the following scripts, all locationed in *./bin*.
 
+* cc-arm-<name>: runs the c compiler
+* cxx-arm-<name>: runs the c++ compiler
+* build-go-arm6.sh: builds the go cross compiler with GOARM=6 configured to use {cc,cxx}-arm-<name>
+* build-go-arm7.sh: builds the go cross compiler with GOARM=7 configured to use {cc,cxx}-arm-<name>
+* go-cmds.sh: source this to add go-arm6-<name> and go-arm7-<name> as shell functions to your bash shell
 
 ## The Go Cross Compiler
 
-Cross Compiling With Go and Cgo
+Cross compiling pure-go with go 1.5 is very easy, (see http://dave.cheney.net/2015/03/03/cross-compilation-just-got-a-whole-lot-better-in-go-1-5). However, cgo complicates the situation and in particular you need to build go from source with appropriate values for *CC_FOR_TARGET* and *CXX_FOR_TARGET*. All of the above setup is really all about being able to provide values for these environment variables! The build-go-arm6.sh or build-go-arm7.sh scripts above take care of this. I don't see a way of having both arm6 and arm7 supported simultaneously other than having two go source trees.
 
-Cross compiling go with cgo dependencies is more complicated than for pure go. In particular, the go toolchain must be built with a cgo cross compiler preconfigured for it. This is achieved by setting: CGO_ENABLED=1, GO_EXTLINK_ENABLED=1, CC_FOR_TARGET and CXX_FOR_TARGET when invoking make.bash for the target architecture. For now,
+## Testing
+
+The directory pixc-test contains some very simple examples to test things out. There is a C library and main in *pixc-test/clib" that can be used to test the C cross compilation components:
+
+```
+$ cd pixc-test/clib
+$ make
+$ rsync -e ssh arm-cc-eg libhello.so you@<your arm system>
+$ ssh you@<your arm system>
+$ LD_LIBRARY_PATH=. ./arm-cc-eg  a b
+main here
+messages:
+0: ./arm-cc-eg
+1: a
+2: b
+
+```
+
+Now, for the go part:
+
+```
+$ . ./bin/go-cmds.sh
+$ cd pixc-test
+$ CGO_LDFLAGS="-L./clib -lhello" go-arm6-raspian build -x .
+$ rsync -e ssh pixc-test u@<your arm system>
+$ ssh you@<your arm system>
+$ LD_LIBRARY_PATH=. ./pixc-test  a b c
+hello go world
+messages:
+0: ./pixc-test
+1: a
+2: b
+3: c
+```
+
+
+
 

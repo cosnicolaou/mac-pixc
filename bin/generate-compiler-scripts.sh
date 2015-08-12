@@ -21,7 +21,17 @@ write_go_xc_script() {
   echo "export GOOS=linux"
   echo "export GOARCH=arm"
   echo "export GOARM=$3"
-  echo "bash ./all.bash"
+  echo "bash ./all.bash --no-clean"
+}
+
+write_go_script() {
+  echo "go-arm6-$1() {"
+  echo '  CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go "$@"'
+  echo "}"
+  echo "go-arm7-$1() {"
+  echo '  CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 go "$@"'
+  echo "}"
+
 }
 
 if [[ $# -ne 2 ]]; then
@@ -55,3 +65,7 @@ rm -f $build_go_arm6_script $build_go_arm7_script
 write_go_xc_script $cc_script $cxx_script 6 > $build_go_arm6_script
 write_go_xc_script $cc_script $cxx_script 7 > $build_go_arm7_script
 chmod +x $build_go_arm6_script $build_go_arm7_script
+
+go_cmds=bin/go-cmds.sh
+rm -f $go_cmds
+write_go_script $name > $go_cmds

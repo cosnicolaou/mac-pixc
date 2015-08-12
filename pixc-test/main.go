@@ -1,8 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
 	fmt.Println("hello go world")
-	Msg([]string{"ohh", "ahh"})
+	Msg(os.Args)
 }
