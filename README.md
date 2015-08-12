@@ -83,7 +83,7 @@ A helper script, *bin/generate-compiler-scripts.sh*, is provided that generates 
 
 ## The Go Cross Compiler
 
-Cross compiling pure-go with go 1.5 is very easy, (see http://dave.cheney.net/2015/03/03/cross-compilation-just-got-a-whole-lot-better-in-go-1-5). However, cgo complicates the situation and in particular you need to build go from source with appropriate values for *CC_FOR_TARGET* and *CXX_FOR_TARGET*. All of the above setup is really all about being able to provide values for these environment variables! The build-go-arm6.sh or build-go-arm7.sh scripts above take care of this. I don't see a way of having both arm6 and arm7 supported simultaneously other than having two go source trees.
+Cross compiling pure-go with go 1.5 is very easy, (see [Dave Cheney's note](http://dave.cheney.net/2015/03/03/cross-compilation-just-got-a-whole-lot-better-in-go-1-5)). However, cgo complicates the situation and in particular you need to build go from source with appropriate values for *CC_FOR_TARGET* and *CXX_FOR_TARGET*. All of the above setup is really all about being able to provide values for these environment variables! The build-go-arm6.sh or build-go-arm7.sh scripts above take care of this. I don't see a way of having both arm6 and arm7 supported simultaneously other than having two go source trees.
 
 ## Testing
 
