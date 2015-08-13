@@ -5,12 +5,16 @@ set -e
 # write script to run a cc+cxx cross compiler
 write_xc_script() {
   echo "#!/bin/bash"
+  echo "compiler=$1"
+  echo 'if [[ "$GOHOSTARCH" = "$GOARCH" && "$GOHOSTOS" = "$GOOS" ]]; then'
+  echo '    exec $compiler "$@"'
+  echo 'fi'
   cat .toolchain.config
   echo "TARGET=arm-linux-gnueabihf"
-  echo "SYSROOT=$1"
+  echo "SYSROOT=$2"
   echo 'ISYSROOT=$SYSROOT/usr/lib/gcc/$TARGET'
   echo 'export PATH=$PIXC_LLVM_BIN:$PATH:'
-  echo 'clang --target=$TARGET --sysroot=$SYSROOT  -isysroot $ISYSROOT -B$PIXC_BINUTILS_BIN "$@"'
+  echo 'exec $compiler --target=$TARGET --sysroot=$SYSROOT  -isysroot $ISYSROOT -B$PIXC_BINUTILS_BIN "$@"'
 }
 
 # write a script to build a go cross compiler
@@ -25,6 +29,12 @@ write_go_xc_script() {
 }
 
 write_go_script() {
+  echo "go-arm6-env() {"
+  echo "export CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6"
+  echo "}"
+  echo "go-arm7-env() {"
+  echo "export CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7"
+  echo "}"
   echo "go-arm6-$1() {"
   echo '  CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go "$@"'
   echo "}"
@@ -55,8 +65,8 @@ here=$(pwd)
 cc_script=$here/bin/cc-arm-$name
 cxx_script=$here/bin/cxx-arm-$name
 rm -f $cc_script $cxx_script
-write_xc_script $sysroot > $cc_script
-ln -s $(basename $cc_script) $cxx_script
+write_xc_script "clang" $sysroot > $cc_script
+write_xc_script "clang++" $sysroot  > $cxx_script
 chmod +x $cc_script $cxx_script
 
 build_go_arm6_script=bin/build-go-arm6.sh
