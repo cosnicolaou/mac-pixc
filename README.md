@@ -77,6 +77,7 @@ A helper script, *bin/generate-compiler-scripts.sh*, is provided that generates 
 
 * cc-arm-<name>: runs the c compiler
 * cxx-arm-<name>: runs the c++ compiler
+* go-{cc,cxx}-arm-<name>: runs the c, c++ compiler but intended to be called via the go tool
 * build-go-arm6.sh: builds the go cross compiler with GOARM=6 configured to use {cc,cxx}-arm-<name>
 * build-go-arm7.sh: builds the go cross compiler with GOARM=7 configured to use {cc,cxx}-arm-<name>
 * go-cmds.sh: source this to add go-arm6-<name> and go-arm7-<name> as shell functions to your bash shell

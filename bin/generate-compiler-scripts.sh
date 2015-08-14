@@ -2,23 +2,34 @@
 
 set -e
 
-# write script to run a cc+cxx cross compiler
-write_xc_script() {
+# write script to run a cc+cxx cross compiler via the go tool
+write_go_xc_script() {
   echo "#!/bin/bash"
   echo "compiler=$1"
   echo 'if [[ "$GOHOSTARCH" = "$GOARCH" && "$GOHOSTOS" = "$GOOS" ]]; then'
   echo '    exec $compiler "$@"'
   echo 'fi'
+  write_xc_script_common $2
+}
+
+# write script to run a cc+cxx cross compiler
+write_xc_script() {
+  echo "#!/bin/bash"
+  echo "compiler=$1"
+  write_xc_script_common $2
+}
+
+write_xc_script_common() {
   cat .toolchain.config
   echo "TARGET=arm-linux-gnueabihf"
-  echo "SYSROOT=$2"
+  echo "SYSROOT=$1"
   echo 'ISYSROOT=$SYSROOT/usr/lib/gcc/$TARGET'
   echo 'export PATH=$PIXC_LLVM_BIN:$PATH:'
   echo 'exec $compiler --target=$TARGET --sysroot=$SYSROOT  -isysroot $ISYSROOT -B$PIXC_BINUTILS_BIN "$@"'
 }
 
 # write a script to build a go cross compiler
-write_go_xc_script() {
+write_build_go_xc_script() {
   echo "export CGO_ENABLED=1"
   echo "export CC_FOR_TARGET=$1"
   echo "export CXX_FOR_TARGET=$2"
@@ -64,16 +75,20 @@ fi
 here=$(pwd)
 cc_script=$here/bin/cc-arm-$name
 cxx_script=$here/bin/cxx-arm-$name
-rm -f $cc_script $cxx_script
+go_cc_script=$here/bin/go-cc-arm-$name
+go_cxx_script=$here/bin/go-cxx-arm-$name
+rm -f $cc_script $cxx_script $go_cc_script $go_cxx_script
 write_xc_script "clang" $sysroot > $cc_script
 write_xc_script "clang++" $sysroot  > $cxx_script
-chmod +x $cc_script $cxx_script
+write_go_xc_script "clang" $sysroot > $go_cc_script
+write_go_xc_script "clang++" $sysroot  > $go_cxx_script
+chmod +x $cc_script $cxx_script $go_cc_script $go_cxx_script
 
 build_go_arm6_script=bin/build-go-arm6.sh
 build_go_arm7_script=bin/build-go-arm7.sh
 rm -f $build_go_arm6_script $build_go_arm7_script
-write_go_xc_script $cc_script $cxx_script 6 > $build_go_arm6_script
-write_go_xc_script $cc_script $cxx_script 7 > $build_go_arm7_script
+write_build_go_xc_script $go_cc_script $go_cxx_script 6 > $build_go_arm6_script
+write_build_go_xc_script $go_cc_script $go_cxx_script 7 > $build_go_arm7_script
 chmod +x $build_go_arm6_script $build_go_arm7_script
 
 go_cmds=bin/go-cmds.sh
