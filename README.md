@@ -69,7 +69,7 @@ Obtaining usable copies of the sysroot and isysroot directories from a target sy
 * /usr/lib
 * /usr/include
 
-These provided suifficient for my initial testing. Obviously it would good to automate this process.
+These provided suifficient for my initial testing. Obviously it would good to automate this process. Two utility go progammes are provided: *util/clean-sysroot* and *util/rewrite-links*. The latter is probably the most important since it will rewrite absolute links in the sysroot tree to be relative to the root of the sysroot. Without out, soft links to system shared libraries (e.g. to /lib/libm.so) cannot be resolved when cross compiling.
 
 ### Scripts to run the compiler
 
@@ -84,7 +84,7 @@ A helper script, *bin/generate-compiler-scripts.sh*, is provided that generates 
 
 ## The Go Cross Compiler
 
-Cross compiling pure-go with go 1.5 is very easy, (see [Dave Cheney's note](http://dave.cheney.net/2015/03/03/cross-compilation-just-got-a-whole-lot-better-in-go-1-5)). However, cgo complicates the situation and in particular you need to build go from source with appropriate values for *CC_FOR_TARGET* and *CXX_FOR_TARGET*. All of the above setup is really all about being able to provide values for these environment variables! The build-go-arm6.sh or build-go-arm7.sh scripts above take care of this. I don't see a way of having both arm6 and arm7 supported simultaneously other than having two go source trees.
+Cross compiling pure-go with go 1.5 is very easy, (see [Dave Cheney's note](http://dave.cheney.net/2015/03/03/cross-compilation-just-got-a-whole-lot-better-in-go-1-5)). However, cgo complicates the situation and in particular you need to build go from source with appropriate values for *CC_FOR_TARGET* and *CXX_FOR_TARGET*. All of the above setup is really all about being able to provide values for these environment variables! The build-go-arm6.sh or build-go-arm7.sh scripts above take care of this. I don't see a way of having both arm6 and arm7 supported simultaneously other than having two go source trees, similarly, it's awkward to have a single go tree for native builds and cross compile builds (CC, CCOPTS etc take the values needed for the cross compiled environment) so I've taken to having separate ones. Disk is cheap and the builds are fast so it's really no big deal.
 
 ## Testing
 
